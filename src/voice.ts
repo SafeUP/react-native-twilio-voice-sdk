@@ -37,6 +37,8 @@ type internalVoiceEventHandlers = internalCallEventHandlers & internalInviteEven
 
 type removeHandlerFn = () => void
 
+let twilioIdentity: String, twilioToken: String
+
 class TwilioVoice {
   // private _registered: boolean = false
   private _currentCall: Call | null = null
@@ -71,7 +73,16 @@ class TwilioVoice {
     return "OFFLINE"
   }
 
-  public connect = (accessToken: string, params = {}): Promise<Call> => {
+  public setIdentity(identity: String) {
+    twilioIdentity = identity
+    twilioIdentity = twilioIdentity
+  }
+
+  public setToken(token: String) {
+    twilioToken = token
+  }
+
+  public connect = (params = {}): Promise<Call> => {
     if(!this._isSetup) {
       return Promise.reject(new Error("Can't call connect on a destroyed Voice instance"));
     }
@@ -79,7 +90,7 @@ class TwilioVoice {
       return Promise.reject(new Error("Can't call connect while a call is still going on"));
     }
     return new Promise((resolve, reject) => {
-      RNTwilioVoice.connect(accessToken, params).then((call: Call) => {
+      RNTwilioVoice.connect(twilioToken, params).then((call: Call) => {
         this.createOrUpdateCall(call)
         resolve(this._currentCall as Call)
       }).catch((err: any) => reject(err))

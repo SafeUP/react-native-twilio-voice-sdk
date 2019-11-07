@@ -49,6 +49,8 @@ class TwilioVoice {
   private _isSetup: boolean = false
   private _nativeVersion: string | undefined
 
+  private _availableEvents: Array<voiceEvent> = ["connect", "disconnect", "connectFailure", "reconnect", "reconnecting", "ringing"]
+
   public constructor () {
     this.setup()
     this.on.bind(this)
@@ -80,6 +82,10 @@ class TwilioVoice {
 
   public setToken(token: String) {
     twilioToken = token
+  }
+
+  public get availableEvents(): Array<voiceEvent> {
+    return this._availableEvents;
   }
 
   public connect = (params = {}): Promise<Call> => {
@@ -142,6 +148,12 @@ class TwilioVoice {
     const firstAppearance = this._eventHandlers[event]!.findIndex(fn => fn === handler)
     if(firstAppearance === -1) { return } // handler doesn't exist
     this._eventHandlers[event]!.splice(firstAppearance, 1)
+  }
+
+  public removeAllListeners = () => {
+    for (let event in this._availableEvents) {
+      this._eventHandlers[event as voiceEvent] = undefined
+    }
   }
 
   private getNativeVersion = (): Promise<string> => {

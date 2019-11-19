@@ -50,6 +50,7 @@ declare class TwilioVoice {
     private onReconnecting;
     private onRinging;
     private disconnectAll;
+    requestCameraPermission: () => Promise<false | "granted" | "denied" | "never_ask_again">;
 }
 declare const _default: TwilioVoice;
 export default _default;

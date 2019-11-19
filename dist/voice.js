@@ -1,4 +1,12 @@
-import { NativeEventEmitter, NativeModules } from 'react-native';
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import { NativeEventEmitter, NativeModules, PermissionsAndroid } from 'react-native';
 import Call from './call';
 import CallError from "./callError";
 const version = require('../package.json').version;
@@ -150,6 +158,28 @@ class TwilioVoice {
             this.parseNativeCallObject(nativeCallObject);
             this.handleEvent("ringing", this._currentCall);
         };
+        this.requestCameraPermission = () => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const granted = yield PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO, {
+                    title: 'Woosender',
+                    message: 'Woosender App needs access to your microphone to make calls',
+                    buttonNeutral: 'Ask Me Later',
+                    buttonNegative: 'Cancel',
+                    buttonPositive: 'OK',
+                });
+                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                    console.log('You can use the camera');
+                }
+                else {
+                    console.log('Camera permission denied');
+                }
+                return granted;
+            }
+            catch (err) {
+                console.warn(err);
+                return false;
+            }
+        });
         this.setup();
         this.on.bind(this);
         this.getNativeVersion().then();

@@ -199,6 +199,9 @@ class TwilioVoice {
         // }
         return "OFFLINE";
     }
+    initWithAccessToken(accessToken) {
+      RNTwilioVoice.initWithAccessToken(accessToken);
+    }
     setIdentity(identity) {
         twilioIdentity = identity;
         twilioIdentity = twilioIdentity;

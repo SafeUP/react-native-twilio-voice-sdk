@@ -75,6 +75,10 @@ class TwilioVoice {
     return "OFFLINE"
   }
 
+  public initWithAccessToken(accessToken: String) {
+    RNTwilioVoice.initWithAccessToken(accessToken);
+  }
+
   public setIdentity(identity: String) {
     twilioIdentity = identity
     twilioIdentity = twilioIdentity

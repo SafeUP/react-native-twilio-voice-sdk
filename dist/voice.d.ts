@@ -22,6 +22,7 @@ declare class TwilioVoice {
     readonly version: string;
     readonly nativeVersion: string | undefined;
     readonly status: voiceStatus;
+    initWithAccessToken(accessToken: String): void;
     setIdentity(identity: String): void;
     setToken(token: String): void;
     readonly availableEvents: Array<voiceEvent>;

@@ -39,6 +39,8 @@ public class TwilioVoiceSDKModule extends ReactContextBaseJavaModule implements 
 
     public static String TAG = "RNTwilioVoiceSDK";
 
+    private String _accessToken;
+
     private Call.Listener callListener = callListener();
     private Call activeCall;
     private AudioFocusManager audioFocusManager;
@@ -156,6 +158,10 @@ public class TwilioVoiceSDKModule extends ReactContextBaseJavaModule implements 
         };
     }
 
+    @ReactMethod
+    public void initWithAccessToken(final String accessToken) {
+        _accessToken = accessToken;
+    }
 
     @ReactMethod
     public void connect(final String accessToken, ReadableMap params, Promise promise) {

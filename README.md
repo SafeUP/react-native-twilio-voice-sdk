@@ -5,8 +5,8 @@ The initial version of this library was forked from [react-native-twilio-program
 
 # Twilio Programmable Voice SDK
 
-- Android 4.1.0
-- iOS 4.1.0
+- Android 5.1.1
+- iOS 5.2.0
 
 ## Installation
 

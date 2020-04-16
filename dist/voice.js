@@ -53,9 +53,9 @@ class TwilioVoice {
             this._eventHandlers[event].splice(firstAppearance, 1);
         };
         this.removeAllListeners = () => {
-            for (let event in this._availableEvents) {
+            this._availableEvents.forEach(event => {
                 this._eventHandlers[event] = undefined;
-            }
+            })
         };
         this.getNativeVersion = () => {
             if (this._nativeVersion) {
@@ -198,6 +198,9 @@ class TwilioVoice {
         //   return "READY"
         // }
         return "OFFLINE";
+    }
+    initWithAccessToken(accessToken) {
+      RNTwilioVoice.initWithAccessToken(accessToken);
     }
     setIdentity(identity) {
         twilioIdentity = identity;

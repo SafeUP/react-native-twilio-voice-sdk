@@ -24,6 +24,7 @@
 @end
 
 @implementation RNTwilioVoiceSDK {
+    NSString * _accessToken;
 }
 
 NSString * const StateConnecting = @"CONNECTING";
@@ -56,6 +57,11 @@ RCT_EXPORT_MODULE()
     }
 }
 
+RCT_EXPORT_METHOD(initWithAccessToken:(NSString *)accessToken) {
+    _accessToken = accessToken;
+    [self configureCallKit];
+}
+
 - (void)configureCallKit {
     CXProviderConfiguration *configuration = [[CXProviderConfiguration alloc] initWithLocalizedName:@"appName"];
     configuration.maximumCallGroups = 1;
@@ -64,9 +70,9 @@ RCT_EXPORT_MODULE()
     [_callKitProvider setDelegate:self queue:nil];
 
     _callKitCallController = [[CXCallController alloc] init];
+
     self.audioDevice = [TVODefaultAudioDevice audioDevice];
     TwilioVoice.audioDevice = self.audioDevice;
-    [self toggleAudioRoute:NO];
 }
 
 RCT_REMAP_METHOD(connect,
@@ -78,7 +84,7 @@ RCT_REMAP_METHOD(connect,
     reject(@"already_connected",@"Calling connect while a call is connected",nil);
   } else {
       [self enableProximityMonitoring];
-      [self configureCallKit];
+      [self toggleAudioRoute:NO];
       NSUUID *uuid = [NSUUID UUID];
       NSString *handle = @"Voice Bot";
       

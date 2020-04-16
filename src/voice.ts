@@ -75,6 +75,10 @@ class TwilioVoice {
     return "OFFLINE"
   }
 
+  public initWithAccessToken(accessToken: String) {
+    RNTwilioVoice.initWithAccessToken(accessToken);
+  }
+
   public setIdentity(identity: String) {
     twilioIdentity = identity
     twilioIdentity = twilioIdentity
@@ -151,9 +155,9 @@ class TwilioVoice {
   }
 
   public removeAllListeners = () => {
-    for (let event in this._availableEvents) {
+    this._availableEvents.forEach(event => {
       this._eventHandlers[event as voiceEvent] = undefined
-    }
+    })
   }
 
   private getNativeVersion = (): Promise<string> => {

@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.happytheapp.react.RNTwilioVoiceSDK">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
 </manifest>

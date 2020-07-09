@@ -1,5 +1,6 @@
 package com.happytheapp.react.RNTwilioVoiceSDK;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
@@ -16,7 +17,7 @@ public class AudioFocusManager {
     private AudioManager audioManager;
     private int originalAudioMode = AudioManager.MODE_NORMAL;
     private AudioFocusRequest focusRequest;
-
+    private  BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     public AudioFocusManager(ReactApplicationContext reactContext) {
         audioManager = (AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
     }
@@ -55,6 +56,12 @@ public class AudioFocusManager {
          * best possible VoIP performance. Some devices have difficulties with speaker mode
          * if this is not set.
          */
+
+        if(bluetoothAdapter.isEnabled()){
+            audioManager.startBluetoothSco();
+        }else{
+            audioManager.stopBluetoothSco();
+        }
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
     }
 
@@ -75,6 +82,9 @@ public class AudioFocusManager {
     public void setSpeakerPhone(Boolean value) {
         // TODO check whether it is necessary to call setAudioFocus again
         // setAudioFocus();
-        audioManager.setSpeakerphoneOn(value);
+        if(!bluetoothAdapter.isEnabled()){ //When bluetooth enable, can't turn on speaker
+            audioManager.setSpeakerphoneOn(value);
+        }
+
     }
 }

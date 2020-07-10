@@ -6,6 +6,7 @@ import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 
@@ -13,15 +14,25 @@ import com.facebook.react.bridge.ReactApplicationContext;
 /*
  * Needed for setting/abandoning audio focus during a call
  */
-public class AudioFocusManager {
+public class AudioFocusManager implements BluetoothInterface {
     private AudioManager audioManager;
     private int originalAudioMode = AudioManager.MODE_NORMAL;
     private AudioFocusRequest focusRequest;
     private  BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    public AudioFocusManager(ReactApplicationContext reactContext) {
+    private boolean isConnected = false;
+    public AudioFocusManager(ReactApplicationContext reactContext, TwilioVoiceSDKModule twilioVoiceSDKModule) {
         audioManager = (AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
+        twilioVoiceSDKModule.setBluetoothInterface(this);
     }
 
+
+    public boolean isConnected() {
+        return isConnected;
+    }
+
+    public void setConnected(boolean connected) {
+        isConnected = connected;
+    }
 
     public void setAudioFocus() {
         if (audioManager == null) {
@@ -57,18 +68,21 @@ public class AudioFocusManager {
          * if this is not set.
          */
 
-        if(bluetoothAdapter.isEnabled()){
-            audioManager.startBluetoothSco();
-        }else{
-            audioManager.stopBluetoothSco();
-        }
+
+
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        if(isConnected()){
+            initAudioBluetooth();
+            handleBluetooth();
+        }
     }
+
 
     public void unsetAudioFocus() {
         if (audioManager == null) {
             return;
         }
+
         audioManager.setMode(originalAudioMode);
         if (Build.VERSION.SDK_INT >= 26) {
             if (focusRequest != null) {
@@ -87,4 +101,44 @@ public class AudioFocusManager {
         }
 
     }
+
+    private void handleBluetooth(){
+        if(bluetoothAdapter.isEnabled() && audioManager != null){
+            audioManager.setBluetoothScoOn(true);
+        }else if (!bluetoothAdapter.isEnabled() && audioManager != null){
+            resetSco();
+
+        }
+    }
+
+    private void resetSco()
+    {
+        audioManager.setMode(AudioManager.MODE_NORMAL);
+        audioManager.stopBluetoothSco();
+        audioManager.setBluetoothScoOn(false);
+        audioManager.setSpeakerphoneOn(false);
+        audioManager.setWiredHeadsetOn(false);
+    }
+
+    @Override
+    public void onBluetoothConnected() {
+        setConnected(true);
+    }
+
+    @Override
+    public void onBluetoothDisconnected() {
+        onNormalModeBluetooth();
+    }
+
+    @Override
+    public void initAudioBluetooth() {
+        onNormalModeBluetooth();
+        audioManager.startBluetoothSco();
+    }
+
+    @Override
+    public void onNormalModeBluetooth() {
+        resetSco();
+    }
+
 }

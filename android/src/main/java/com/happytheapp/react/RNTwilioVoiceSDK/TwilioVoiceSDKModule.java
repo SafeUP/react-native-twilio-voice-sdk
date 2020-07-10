@@ -1,5 +1,10 @@
 package com.happytheapp.react.RNTwilioVoiceSDK;
 
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 
 import android.util.Log;
@@ -46,6 +51,38 @@ public class TwilioVoiceSDKModule extends ReactContextBaseJavaModule implements 
     private AudioFocusManager audioFocusManager;
     private ProximityManager proximityManager;
     private EventManager eventManager;
+    private BluetoothInterface bluetoothInterface;
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if(bluetoothInterface != null){
+                if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                    // bluetoothInterface.onBluetoothConnected();
+                }
+                else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+                    bluetoothInterface.onBluetoothDisconnected();
+                }
+            }
+
+        }
+    };
+
+    private final BroadcastReceiver audioReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction() != null && intent.getAction().equals(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)){
+                int scoAudioState = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+                if(scoAudioState == AudioManager.SCO_AUDIO_STATE_CONNECTED){
+                    bluetoothInterface.onBluetoothConnected();
+                }
+            }
+
+
+        }
+    };
+
 
     public TwilioVoiceSDKModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -57,10 +94,16 @@ public class TwilioVoiceSDKModule extends ReactContextBaseJavaModule implements 
         reactContext.addLifecycleEventListener(this);
 
         eventManager = new EventManager(reactContext);
-        audioFocusManager = new AudioFocusManager(reactContext);
+        audioFocusManager = new AudioFocusManager(reactContext, this);
+
         proximityManager = new ProximityManager(reactContext);
 
     }
+
+    public void setBluetoothInterface(BluetoothInterface bluetoothInterface){
+        this.bluetoothInterface = bluetoothInterface;
+    }
+
 
     // region Lifecycle Event Listener
     @Override
@@ -71,18 +114,41 @@ public class TwilioVoiceSDKModule extends ReactContextBaseJavaModule implements 
         if(getCurrentActivity() != null ) {
             getCurrentActivity().setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
         }
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        getCurrentActivity().registerReceiver(mReceiver, filter);
+
+        IntentFilter audioIntentFilter = new IntentFilter();
+        audioIntentFilter.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED);
+        getCurrentActivity().registerReceiver(audioReceiver, audioIntentFilter);
+        bluetoothInterface.initAudioBluetooth();
+    }
+
+    private void onNormalModeBluetooth(){
+        if(bluetoothInterface != null){
+            bluetoothInterface.onNormalModeBluetooth();
+        }
     }
 
     @Override
     public void onHostPause() {
         // the library needs to listen for events even when the app is paused
 //        unregisterReceiver();
+        if(getCurrentActivity() != null){
+            getCurrentActivity().unregisterReceiver(mReceiver);
+            getCurrentActivity().unregisterReceiver(audioReceiver);
+            onNormalModeBluetooth();
+        }
     }
 
     @Override
     public void onHostDestroy() {
         disconnect();
         audioFocusManager.unsetAudioFocus();
+        onNormalModeBluetooth();
+
     }
     // endregion
 

@@ -5,4 +5,5 @@ public interface BluetoothInterface {
     void onBluetoothDisconnected();
     void initAudioBluetooth();
     void onNormalModeBluetooth();
+    void onStartBluetoothSCO();
 }

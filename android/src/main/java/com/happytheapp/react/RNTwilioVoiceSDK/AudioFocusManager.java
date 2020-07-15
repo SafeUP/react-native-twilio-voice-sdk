@@ -38,6 +38,7 @@ public class AudioFocusManager implements BluetoothInterface {
         if (audioManager == null) {
             return;
         }
+
         originalAudioMode = audioManager.getMode();
         // Request audio focus before making any device switch
         if (Build.VERSION.SDK_INT >= 26) {
@@ -71,10 +72,13 @@ public class AudioFocusManager implements BluetoothInterface {
 
 
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        onStartBluetoothSCO();
         if(isConnected()){
             initAudioBluetooth();
             handleBluetooth();
         }
+
+
     }
 
 
@@ -83,7 +87,8 @@ public class AudioFocusManager implements BluetoothInterface {
             return;
         }
 
-        audioManager.setMode(originalAudioMode);
+        audioManager.setMode(AudioManager.MODE_NORMAL);
+
         if (Build.VERSION.SDK_INT >= 26) {
             if (focusRequest != null) {
                 audioManager.abandonAudioFocusRequest(focusRequest);
@@ -91,6 +96,7 @@ public class AudioFocusManager implements BluetoothInterface {
         } else {
             audioManager.abandonAudioFocus(null);
         }
+        onStartBluetoothSCO();
     }
 
     public void setSpeakerPhone(Boolean value) {
@@ -113,11 +119,14 @@ public class AudioFocusManager implements BluetoothInterface {
 
     private void resetSco()
     {
-        audioManager.setMode(AudioManager.MODE_NORMAL);
-        audioManager.stopBluetoothSco();
-        audioManager.setBluetoothScoOn(false);
-        audioManager.setSpeakerphoneOn(false);
-        audioManager.setWiredHeadsetOn(false);
+        if(bluetoothAdapter.isEnabled()){
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+            audioManager.stopBluetoothSco();
+            audioManager.setBluetoothScoOn(false);
+            audioManager.setSpeakerphoneOn(false);
+            audioManager.setWiredHeadsetOn(false);
+        }
+
     }
 
     @Override
@@ -132,13 +141,21 @@ public class AudioFocusManager implements BluetoothInterface {
 
     @Override
     public void initAudioBluetooth() {
+
         onNormalModeBluetooth();
-        audioManager.startBluetoothSco();
+
     }
 
     @Override
     public void onNormalModeBluetooth() {
         resetSco();
+    }
+
+    @Override
+    public void onStartBluetoothSCO() {
+        if(bluetoothAdapter.isEnabled() && audioManager != null){
+            audioManager.startBluetoothSco();
+        }
     }
 
 }

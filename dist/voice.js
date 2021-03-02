@@ -161,8 +161,8 @@ class TwilioVoice {
         this.requestCameraPermission = () => __awaiter(this, void 0, void 0, function* () {
             try {
                 const granted = yield PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO, {
-                    title: 'Woosender',
-                    message: 'Woosender App needs access to your microphone to make calls',
+                    title: 'SafeUP',
+                    message: 'SafeUP App needs access to your microphone to make calls',
                     buttonNeutral: 'Ask Me Later',
                     buttonNegative: 'Cancel',
                     buttonPositive: 'OK',
